@@ -1,14 +1,11 @@
 # Simple game to test out riak
 
-# Huge thanks to (this started as a fork of)
-https://github.com/gpad/no_slides
-
 # To get this running on my macbook...
 
-I had to set erlang version, set iex version, change set rebar versions for the build.
+I had to set erlang version, set iex version, set rebar versions for the build.
 
 ## Erlang 18.3
-To set the erlang version for this session, install kerl
+To set the erlang version for this shell session, install kerl
 ```shell
 brew install kerl
 kerl list releases
@@ -21,7 +18,7 @@ erl -v
 ```
 
 ## iex 1.3.4
-To set the iex version for this session, install kiex
+To set the iex version for this shell session, install kiex
 ```shell
 curl -sSL https://raw.githubusercontent.com/taylor/kiex/master/install | bash -s
 
@@ -69,7 +66,7 @@ mix compile
 ## Credits
 Thanks to:
 
-- [gpad/no_slides](https://github.com/gpad/no_slides) this is a fork from there
+- [gpad/no_slides](https://github.com/gpad/no_slides) Huge thanks -- this is a fork of this repo
 - [@naveennegi - vyuha](https://github.com/nav301186/vyuha) the first riak app I worked through
 - [@naveennegi - riak core with elixir blog](https://medium.com/@naveennegi/riak-core-with-elixir-part-one-89dc950cef78) the blog
 - [kerl](https://github.com/kerl/kerl)
