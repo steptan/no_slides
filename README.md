@@ -1,109 +1,78 @@
-# NoSlides example application
+# Simple game to test out riak
 
-Example application for the talk at [NoSlidesConf][0]. This application is a sample application with some functionalities available on riak_core.
+# Huge thanks to (this started as a fork of)
+https://github.com/gpad/no_slides
 
-**You need to use Elixir 1.3 and Erlang 18.X**. There are some works on [riak_core][1] and [riak_core_ng][2] to move on Erlang 19.X, but when I wrote this docs it's not ready.
+# To get this running on my macbook...
 
-Clone the repository as usually, download the dependencies and compile the app in this way:
+I had to set erlang version, set iex version, change set rebar versions for the build.
+
+## Erlang 18.3
+To set the erlang version for this session, install kerl
+```shell
+brew install kerl
+kerl list releases
+kerl build 18.3 18.3
+kerl list builds
+kerl install 18.3 ~/.kerl/18.3
+. ~/.kerl/18.3/activate
+erl -v
+  Erlang/OTP 18 [erts-7.3] [source] [64-bit] [smp:8:8] [async-threads:10] [hipe] [kernel-poll:false]
+```
+
+## iex 1.3.4
+To set the iex version for this session, install kiex
+```shell
+curl -sSL https://raw.githubusercontent.com/taylor/kiex/master/install | bash -s
+
+kiex list
+kiex list known
+kiex install 1.3.4 && kiex use $_
+kiex use 1.3.4
+  Using 1.3.4
+iex
+  Erlang/OTP 18 [erts-7.3] [source] [64-bit] [smp:8:8] [async-threads:10] [hipe] [kernel-poll:false]
+
+  Interactive Elixir (1.3.4) - press Ctrl+C to exit (type h() ENTER for help)
+  iex(1)>
+```
+
+## mix.exs
+Then there are rebar issues with the builds of riak_core_ng and cuttlefish. 
+To un-confuse rebar, define which version of rebar should manage the build of riak_core_ng and cuttlefish:
+
+```shell
+
+  defp deps do
+    [
+            {:riak_core, "~> 3.0", hex: :riak_core_ng, manager: :rebar3},
+            {:cuttlefish, "~> 2.0.7", manager: :rebar},
+    ]
+```
+
+Another gotcha, this is now elixir 1.3.4 old school, so watch the application definition in mix.exs. _do not_ use extra_applications:
+```shell
+  def application do
+    [ mod: {Vyuha.App, []},
+        applications: [:riak_core, :logger]]
+  end
+```
+
+## build
+Now build your elixir/riak_core application:
 
 ```shell
 mix deps.get
 mix compile
 ```
 
-## How to start a single node
-If you want run a single node you can execute in this way:
-
-```shell
-$ iex --name gpad@127.0.0.1 -S mix run
-```
-You can substitute `gpad` with the name that you prefer. You have to always run riak_core with full name using `--name` parameter.
-
-## How to start multinode on same machine
-In this repo it's possibile execute 3 nodes on the same machine. You can execute it in this way:
-
-```shell
-# this is node 1
-MIX_ENV=gpad_1 iex --name gpad_1@127.0.0.1 -S mix run
-
-# this is node 2
-MIX_ENV=gpad_2 iex --name gpad_2@127.0.0.1 -S mix run
-
-# this is node 3
-MIX_ENV=gpad_3 iex --name gpad_3@127.0.0.1 -S mix run
-```
-
-If you want add more nodes you can check the file in `config` directory.
-
-## Join/Leave node
-When you run all the nodes they are running alone. If you want join two node together and create cluster you could go, for example, on console on node 2 and execute this command:
-
-```elixir
-iex(gpad_2@127.0.0.1)1>  :riak_core.join('gpad_1@127.0.0.1')
-```
-In this way node 2, called `gpad_2` is joined on node 1, called `gpad_1`. Now this two node are a cluster.
-
-The same command could be executed on console of node 3:
-
-```elixir
-iex(gpad_3@127.0.0.1)1>  :riak_core.join('gpad_1@127.0.0.1')
-```
-
-When the cluster is stable you can try to put some data in it using the `put` command (see below) and then you can remove a node from the cluster with the `leave` command. Try it in this way:
-
-```elixir
-# removing node 2 from cluster
-iex(gpad_2@127.0.0.1)1>  :riak_core.leave
-```
-How the cluster is composed is saved in disk so, if you stop and restart one or all nodes, they try to connect together, if you want destroy the cluster you can remove evry single node with `leave` command or deleted the various `ring_data_dir*`.
-
-
-## Print ring status
-After or before the join you can check the status of the ring. You can do this executing this command on elixir shell:
-
-```elixir
-iex(gpad_1@127.0.0.1)1> {:ok, ring} = :riak_core_ring_manager.get_my_ring
-iex(gpad_1@127.0.0.1)1> :riak_core_ring.pretty_print(ring, [:legend])
-```
-
-## Functionalities
-In this example it's now possible execute a `ping` command with default value of `1` but it's possible pass also a different value to have more chance to change the destination node.
-
-```elixir
-iex(gpad_1@127.0.0.1)1> NoSlides.Service.ping
-iex(gpad_1@127.0.0.1)1> NoSlides.Service.ping(2)
-#execute a lot of different ping
-(1..20) |> Enum.each(fn v -> NoSlides.Service.ping(v) end)
-```
-
-It's also possible use this application as a simple KV memory store, in this way:
-
-```elixir
-# on node 1
-iex(gpad_1@127.0.0.1)1> NoSlides.Service.put(:key, 42)
-```
-On node execute the command to store the value `42` associated with key `:key` and, it's possible get this value from another node, in this way:
-
-```elixir
-# on node 2
-iex(gpad_2@127.0.0.1)1> NoSlides.Service.get(:key)
-```
-
-Depending on your configuration and how many nodes you are running, you can see some different node that respond to this requests. Try to get value before and after a join and a subsequent leave of a node.
-
-## More infos...
-I'm writing some post about the use of riak_core from Elixir, and you can find it [here][99].
-
 ## Credits
 Thanks to:
-- [basho](http://basho.com/) for creating the [library][1] and the [docs](http://basho.com/search/?q=riak_core).
-- [Heinz N. Gies](https://twitter.com/heinz_gies) for creating [riak_core_ng][2] that can be used in [Elixir][3].
-- [Ben Tyler](https://github.com/kanatohodets) for the inspiration talk at [ElixirConf.EU](http://www.elixirconf.eu/elixirconf2016/ben-tyler).
-- [Mariano Guerra](https://twitter.com/warianoguerra) for this amazing [book](https://marianoguerra.github.io/little-riak-core-book/) about riak_core.
-- [Ryan Zezeski](https://twitter.com/rzezeski) for his [blog](https://github.com/rzezeski/try-try-try) about riak_core.
 
-[0]: http://www.noslidesconf.net/#schedule
-[1]: https://github.com/basho/riak_core/
-[2]: https://github.com/project-fifo/riak_core
-[3]: https://hex.pm/packages/riak_core_ng
-[99]: https://medium.com/@gpad/
+- [gpad/no_slides](https://github.com/gpad/no_slides) this is a fork from there
+- [@naveennegi - vyuha](https://github.com/nav301186/vyuha) the first riak app I worked through
+- [@naveennegi - riak core with elixir blog](https://medium.com/@naveennegi/riak-core-with-elixir-part-one-89dc950cef78) the blog
+- [kerl](https://github.com/kerl/kerl)
+- [kiex](https://github.com/taylor/kiex)
+- [basho](http://basho.com/) for creating riak
+- [Heinz N. Gies](https://twitter.com/heinz_gies) for creating [riak_core_ng][2] that can be used in [Elixir][3].
