@@ -1,6 +1,6 @@
-# Simple game to test out riak
+# Simple game to learn and experiment with riak
 
-# To get this running on my macbook...
+## To get this running on my macbook...
 
 I had to set erlang version, set iex version, set rebar versions for the build.
 
@@ -72,4 +72,5 @@ Thanks to:
 - [kerl](https://github.com/kerl/kerl)
 - [kiex](https://github.com/taylor/kiex)
 - [basho](http://basho.com/) for creating riak
-- [Heinz N. Gies](https://twitter.com/heinz_gies) for creating [riak_core_ng][2] that can be used in [Elixir][3].
+- [Heinz N. Gies](https://twitter.com/heinz_gies) for creating elixir-compatible [riak_core_ng](https://hex.pm/packages/riak_core_ng)
+
