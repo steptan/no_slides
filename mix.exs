@@ -2,20 +2,24 @@ defmodule NoSlides.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :no_slides,
-     version: "0.1.0",
-     elixir: "~> 1.3",
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps()]
+    [
+      app: :ring,
+      version: "0.1.0",
+      elixir: "~> 1.3",
+      build_embedded: Mix.env == :prod,
+      start_permanent: Mix.env == :prod,
+      deps: deps()
+    ]
   end
 
   # Configuration for the OTP application
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:riak_core, :logger ],
-     mod: {NoSlides, []}]
+    [
+      applications: [:riak_core, :logger ],
+      mod: {Ring, []}
+    ]
   end
 
   # Dependencies can be Hex packages:
@@ -29,7 +33,8 @@ defmodule NoSlides.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:riak_core, "~> 2.2.8", hex: :riak_core_ng}
+      {:riak_core, "~> 3.0", hex: :riak_core_ng, manager: :rebar3},
+      {:cuttlefish, "~> 2.0.7", manager: :rebar},
     ]
   end
 end
